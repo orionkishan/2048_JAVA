@@ -89,6 +89,7 @@ public class GameBoard {
  		board = new Tile[ROWS][COLS];
  		gameBoard = new BufferedImage(BOARD_WIDTH, BOARD_HEIGHT, BufferedImage.TYPE_INT_RGB);
  		finalBoard = new BufferedImage(BOARD_WIDTH, BOARD_HEIGHT, BufferedImage.TYPE_INT_RGB);
+		startTime = System.nanoTime();
 
 		loadHighScore();
  		createBoardImage();
@@ -249,11 +250,24 @@ public class GameBoard {
 		 g.setFont(scoreFont);
 		 g.drawString("" + score, 30,40);
 		 g.setColor(Color.red);
-		 g.drawString("Best: " + highScore, Game.WIDTH-DrawUtils.getMessageWidth("Best: " + highScore, scoreFont,g) - 20,30)
+		 g.drawString("Best: " + highScore, Game.WIDTH-DrawUtils.getMessageWidth("Best: " + highScore, scoreFont,g) - 20,30);
+		g.setColor(Color.black);
+		g.drawString("Time" + formattedTime,30,90);
+		g.setColor(Color.red);
+		g.drawString("Fastest: " + formatTime(fastestMS), Game.WIDTH - DrawUtils.getMessageWidth("Fastest: " + formatTime(fastestMS), scoreFont, g)-20,90);
  	}
  	
  	public void update()
  	{
+		if(!won && !dead){
+			if(hasStarted){
+				elapsedMS = (System.nanoTime() - startTime)/1000000;
+				formattedTime = formatTime(elapsedMS);
+			}
+			else{
+				startTime =  System.nanoTime();
+			}
+		}
  		checkKeys(); // check for keyboard input
 
 		 if(score > highScore){
@@ -284,7 +298,57 @@ public class GameBoard {
 		 int hours = (int)(millis/3600000);
 		 if(hours>=1){
 			 millis -= hours*3600000;
+			 if(hours > 10){
+				hourFormat = "0" + hours;
+			 }
+			 else{
+				 hourFormat  = "" + hours;
+			 }
+			 hourFormat += ":";
 		 }
+		 
+		 String minuteFormat;
+		 int minutes = (int)(millis/60000);
+		 if(minutes >= 1){
+			 millis -= minutes*60000;
+			 if(minutes< 10){
+				 minuteFormat = "0" + minutes;
+			 }
+			 else{
+				 minuteFormat = "" + minutes;
+			 }
+		 }
+		 else{
+			 minuteFormat = "00";
+		 }
+		 
+		 String secondFormat;
+		 int seconds = (int)(millis/1000);
+		 if(seconds >= 1){
+			 millis -= seconds*1000;
+			 if(seconds< 10){
+				 secondFormat = "0" + seconds;
+			 }
+			 else{
+				 secondFormat = "" + seconds;
+			 }
+		 }
+		 else{
+			 secondFormat = "00";
+		 }
+		 
+		 String milliFormat;
+		 if(millis > 99){
+		 	milliFormat = "" + millis;
+		 }
+		 else if(millis > 9){
+		 	milliFormat = "" + millis;
+		 }
+		 else{
+		 	milliFormat = "00" + millis;
+		 }
+		 formattedTime = hourFormat + minuteFormat + ":" + secondFormat + ":" + milliFormat;
+		 return formattedTime;
 	 }
 	 private void resetPosition(Tile current, int row, int col){
 		 if(current == null) return;
@@ -320,33 +384,28 @@ public class GameBoard {
  	{
  		if(Keyboard.typed(KeyEvent.VK_LEFT))
  		{
+		        moveTiles(Direction.LEFT);
  			if(!hasStarted) hasStarted = true;
  		}
  		
  		if(Keyboard.typed(KeyEvent.VK_RIGHT))
  		{
+		        moveTiles(Direction.RIGHT);
  			if(!hasStarted) hasStarted = true;
  		}
  		
  		if(Keyboard.typed(KeyEvent.VK_UP))
  		{
+		        moveTiles(Direction.UP);
  			if(!hasStarted) hasStarted = true;
  		}
  		
  		if(Keyboard.typed(KeyEvent.VK_DOWN))
  		{
+		        moveTiles(Direction.DOWN);
  			if(!hasStarted) hasStarted = true;
  		}
  	}
-
-     private void checkKeys(){
-        //move tiles left
-        moveTiles(Direction.LEFT);
-        moveTiles(Direction.RIGHT);
-        moveTiles(Direction.UP);
-        moveTiles(Direction.DOWN);
-
-    }
     
     private void moveTiles(Direction dir){
         boolean canMove = false; // initially we assume that tiles cannot move
@@ -428,6 +487,7 @@ public class GameBoard {
 			}
 		}
 		dead = true;
+		if(score >= highScore) highScore = score;
 		setHighScore();
 	}
 
@@ -474,7 +534,7 @@ private boolean checkSurroundingTiles(int row, int col, Tile current){
 				board[newRow][newCol].getSlideTo(new Point(newRow, newCol));
 				canMove = true;
 			}
-			else if(board[newRow][newCol.getValue() == current.getValue() && board[newRow][newCol].canCombine()){
+			else if(board[newRow][newCol].getValue() == current.getValue() && board[newRow][newCol].canCombine()){
 				board[newRow][newCol].setCanCombine(false);
 				board[newRow][newCol].setValue(board[newRow][newCol].getValue()*2);
 				canMove = true;
