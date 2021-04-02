@@ -1,6 +1,3 @@
-public class GameBoard{
-    
-}
 /* =====================================
  * This class is for implementing the 
  * algorithm of game; it checks where
@@ -16,6 +13,8 @@ package com.javaproject.game;
 import Tile.*;
 import Point.*;
 import java.awt.Color;
+import java.io.*;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -58,11 +57,10 @@ public class GameBoard {
 
 	 //integers to keep track of your scores and high scores
 	 private int score= 0;
-	 private int highscore = 0;
+	 private int highScore = 0;
 	 private Font scoreFont;
-	
 	 // variables to save stuff
-	 private String saveDataPath
+	 private String saveDataPath;
 	 private String  fileName = "SaveData";
 
 	 //Time
@@ -77,13 +75,13 @@ public class GameBoard {
  	public GameBoard(int x, int y)
  	{
 		 try {
-			 saveDataPath = GameBoard.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+			saveDataPath = GameBoard.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 			//  saveDataPath = System.getProperty("user.home") + "\\foldername";
 		 } catch (Exception e) {
 			 e.printStackTrace();
 		}
 
-		scoreFont = Game.main.deriveFont(24f)
+		scoreFont = Game.main.deriveFont(24f);
  		this.x=x;
  		this.y=y;
  		board = new Tile[ROWS][COLS];
@@ -100,9 +98,9 @@ public class GameBoard {
 		 try{
 			 File file = new File(saveDataPath, fileName);
 
-			 File Writer output = new FileWriter(file);
+			 FileWriter output = new FileWriter(file);
 			 BufferedWriter writer = new BufferedWriter(output);
-			 writer.write('' + 0);
+			 writer.write("" + 0);
 			 writer.newLine();
 			 writer.write("" + Integer.MAX_VALUE);
 			 writer.close();
@@ -114,27 +112,26 @@ public class GameBoard {
 
 	 private void loadHighScore(){
 		 try {
-			 File f = new File(saveDataPath, fileName);
-			 if(!f.isFile()){
-				 createSaveData();
-			 }
+			File f = new File(saveDataPath, fileName);
+			if(!f.isFile()){
+				createSaveData();
+			}
 
-			 BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-			 highScore = Integer.parseInt(reader.readLine());
-
-			 fastestMS = Long.parseLong(reader.readLine());
-			 reader.close();
-		 } catch (Exception e) {
-			 e.printStackTrace();
-		 }
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+			highScore = Integer.parseInt(reader.readLine());
+			fastestMS = Long.parseLong(reader.readLine());
+			reader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	 }
 	 private void setHighScore(){
 		 FileWriter output = null;
 
 		 try {
-			 File f = new File(saveDataPath, fileName);
-			 output = new FileWriter(f);
-			 BufferedWriter writer = new BufferedWriter(output);
+			File f = new File(saveDataPath, fileName);
+			output = new FileWriter(f);
+			BufferedWriter writer = new BufferedWriter(output);
 			writer.write("" + highScore);
 			writer.newLine();
 			if(elapsedMS <= fastestMS && won){
@@ -246,11 +243,11 @@ public class GameBoard {
  		// drawing to the screen
  		g.drawImage(finalBoard, x, y, null);
  		g2d.dispose();
-		 g.setColor(Color.lightGray);
-		 g.setFont(scoreFont);
-		 g.drawString("" + score, 30,40);
-		 g.setColor(Color.red);
-		 g.drawString("Best: " + highScore, Game.WIDTH-DrawUtils.getMessageWidth("Best: " + highScore, scoreFont,g) - 20,30);
+		g.setColor(Color.lightGray);
+		g.setFont(scoreFont);
+		g.drawString("" + score, 30,40);
+		g.setColor(Color.red);
+		g.drawString("Best: " + highScore, Game.WIDTH-DrawUtils.getMessageWidth("Best: " + highScore, scoreFont,g) - 20,30);
 		g.setColor(Color.black);
 		g.drawString("Time" + formattedTime,30,90);
 		g.setColor(Color.red);
@@ -270,7 +267,7 @@ public class GameBoard {
 		}
  		checkKeys(); // check for keyboard input
 
-		 if(score > highScore){
+		 if(score >= highScore){
 			 highScore = score;
 		 }
  		
@@ -350,11 +347,12 @@ public class GameBoard {
 		 formattedTime = hourFormat + minuteFormat + ":" + secondFormat + ":" + milliFormat;
 		 return formattedTime;
 	 }
+
 	 private void resetPosition(Tile current, int row, int col){
 		 if(current == null) return;
 
 		 int x = getTileX(col);
-		 int y = getTileY(roq);
+		 int y = getTileY(row);
 		 
 		 int distX = current.getX() - x;
 		 int distY = current.getY() - y;
@@ -370,16 +368,17 @@ public class GameBoard {
 		 if(distX < 0){
 			 current.setX(current.getX() + Tile.SLIDE_SPEED);
 		 }
-		 if(disY < 0){
+		 if(distY < 0){
 			 current.setY(current.getY() + Tile.SLIDE_SPEED);
 		 }
 		 if(distX > 0){
 			current.setX(current.getX() - Tile.SLIDE_SPEED);
 		}
-		if(disY > 0){
+		if(distY > 0){
 			current.setY(current.getY() - Tile.SLIDE_SPEED);
 		}
-	 }
+	}
+
  	private void checkKeys() // check if key is pressed and move accordingly
  	{
  		if(Keyboard.typed(KeyEvent.VK_LEFT))
@@ -469,15 +468,15 @@ public class GameBoard {
 
         for(int row = 0; row<ROWS; row++){
             for(int col= 0; col<COLS;col++){
-                Tile current = board[row][col]
+                Tile current = board[row][col];
                 if(canMove){
                     spawnRandom();
 					//check dead
                 }
             }
         }
-    }
-	private checkDead(){
+     }
+	private void checkDead(){
 		for(int row=0;row<ROWS;row++){
 			for(int col=0;col<COLS;col++){
 				if(board[row][col] == null) return;
@@ -531,7 +530,7 @@ private boolean checkSurroundingTiles(int row, int col, Tile current){
 			if(board[newRow][newCol] == null){
 				board[newRow][newCol] = current;
 				board[newRow - verticalDirection][newCol - horizontalDirection] = null;
-				board[newRow][newCol].getSlideTo(new Point(newRow, newCol));
+				board[newRow][newCol].setSlideTo(new Point(newRow, newCol));
 				canMove = true;
 			}
 			else if(board[newRow][newCol].getValue() == current.getValue() && board[newRow][newCol].canCombine()){
@@ -549,4 +548,31 @@ private boolean checkSurroundingTiles(int row, int col, Tile current){
 		}
         return canMove;	
     }
+
+	private boolean checkOutOfBounds(Direction dir,int row,int col)
+	{
+		if(dir==Direction.LEFT)
+		{
+			return col<0;
+
+		}
+
+		else if(dir==Direction.RIGHT)
+		{
+			return col>COLS-1;
+		}
+
+		else if(dir==Direction.UP)
+		{
+			return row<0;
+		}
+
+		else if(dir==Direction.DOWN)
+		{
+			return row>ROWS-1;
+		}
+
+		return false;
+	}
 }
+

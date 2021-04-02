@@ -10,6 +10,8 @@ package com.javaproject.game;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -37,7 +39,7 @@ public class Tile {
 	private Point slideTo; // row and col where the tile needs to go to
     private boolean canCombine = true; // if the tiles can combine or not
 
-	private beginningAnimation = true;
+	private boolean beginningAnimation = true;
 	private double scaleFirst = 0.1;
 	private BufferedImage beginningImage;
 
@@ -234,16 +236,16 @@ public class Tile {
     public boolean canCombine(){
         return canCombine;
     }
-    public void setcanCombine(boolean canCombine){
+    public void setCanCombine(boolean canCombine){
         this.canCombine = canCombine;
     }
 
     // Getter Setter Methods of getSlideTo
     public Point getSlideTo(){
-        return this.slideTo
+        return this.slideTo;
     }
-    public setSlideTo(){
-        this.slideTo = slideTo
+    public void setSlideTo(Point slideTo){
+        this.slideTo = slideTo;
     }
 
 	public int getX(){
