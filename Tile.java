@@ -35,7 +35,15 @@ public class Tile {
 	private int y;
 
 	private Point slideTo; // row and col where the tile needs to go to
-    private boolean canCombine; // if the thing is already combine or not
+    private boolean canCombine = true; // if the tiles can combine or not
+
+	private beginningAnimation = true;
+	private double scaleFirst = 0.1;
+	private BufferedImage beginningImage;
+
+	private boolean combineAnimation = false;
+	private double scaleCombine = 1.2;
+	private BufferedImage combineImage;
 	
 	// constructor to create tile
 	public Tile(int value, int x, int y)
@@ -43,7 +51,10 @@ public class Tile {
 		this.value= value;
 		this.x=x;
 		this.y=y;
+		slideTo  = new Point(x,y);
 		tileImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		beginningImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		combineImage = new BufferedImage(2*WIDTH, 2*HEIGHT, BufferedImage.TYPE_INT_ARGB);
 		drawImage();
 	}
 
@@ -168,17 +179,55 @@ public class Tile {
 	
 	public void update()
 	{
-		
+		if(beginningAnimation){
+			AffineTransform transform = new AffineTransform();
+			transform .translate(WIDTH/2 -scaleFirst*WIDTH/2, HEIGHT/2 -scaleFirst*HEIGHT/2);
+			transform.scale(scaleFirst, scaleFirst);
+			Graphics2D g2d = (Graphics2D) beginningImage.getGraphics();
+			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g2d.setColor(new Color(0,0,0,0));
+			g2d.fillRect(0,0,WIDTH, HEIGHT);
+			g2d.drawImage(tileImage, transform, null); 
+			scaleFirst += 0.1;
+			g2d.dispose();
+			if(scaleFirst>= 1)beginningAnimation=false;
+		}
+		else if(combineAnimation){
+			AffineTransform transform = new AffineTransform();
+			transform .translate(WIDTH/2 -scaleCombine*WIDTH/2, HEIGHT/2 -scaleCombine*HEIGHT/2);
+			transform.scale(scaleCombine, scaleCombine);
+			Graphics2D g2d = (Graphics2D) combineImage.getGraphics();
+			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g2d.setColor(new Color(0,0,0,0));
+			g2d.fillRect(0,0,WIDTH, HEIGHT);
+			g2d.drawImage(tileImage, transform, null); 
+			scaleCombine -= 0.1;  /// we could change this for slower animations
+			g2d.dispose();
+			if(scaleCombine <= 1) combineAnimation=false;
+		}
 	}
 	
 	public void render(Graphics2D g) // draw tile to screen
 	{
-		g.drawImage(tileImage, x, y, null);
+		if(beginningAnimation){
+			g.drawImage(beginningImage,x,y,null);
+		}
+		else if(combineAnimation){
+			g.drawImage(combineImage,(int)(x + WIDTH/2 - scaleCombine*WIDTH/2),(int)(y + WIDTH/2 - scaleCombine*WIDTH/2),null);
+		}
+		else{
+			g.drawImage(tileImage, x, y, null);
+		}
 	}
 
 	public int getValue()
 	{
 		return value;
+	}
+
+	public void setValue(int value){
+		this.value = value;
+		drawImage();
 	}
 
 	// Getter Setter Methods of CanCombine
@@ -196,5 +245,29 @@ public class Tile {
     public setSlideTo(){
         this.slideTo = slideTo
     }
+
+	public int getX(){
+		return x;
+	}
+	
+	public void setX(int x){
+		this.x = x;
+	}
+
+	public int getY(){
+		return y;
+	}
+
+	public void setY(int y){
+		this.y = y;
+	}
+
+	public boolean isCombineAnimation(){
+		return combineAnimation;
+	}
+	public void setCombineAnimation(boolean combineAnimation){
+		this.combineAnimation = combineAnimation;
+		if(combineAnimation) scaleCombine = 1.2;
+	}
 	
 }
