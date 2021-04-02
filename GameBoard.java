@@ -64,6 +64,13 @@ public class GameBoard {
 	 // variables to save stuff
 	 private String saveDataPath
 	 private String  fileName = "SaveData";
+
+	 //Time
+	private long elapsedMS;
+	private long fastestMS;
+	private long startTime;
+	private String formattedTime = "00:00:000";
+
 	 
  	
  	// constructor to set coordinates of board and background data
@@ -95,7 +102,8 @@ public class GameBoard {
 			 File Writer output = new FileWriter(file);
 			 BufferedWriter writer = new BufferedWriter(output);
 			 writer.write('' + 0);
-			 // create fastest time
+			 writer.newLine();
+			 writer.write("" + Integer.MAX_VALUE);
 			 writer.close();
 		 }
 		 catch(Exception e){
@@ -112,6 +120,8 @@ public class GameBoard {
 
 			 BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
 			 highScore = Integer.parseInt(reader.readLine());
+
+			 fastestMS = Long.parseLong(reader.readLine());
 			 reader.close();
 		 } catch (Exception e) {
 			 e.printStackTrace();
@@ -125,6 +135,13 @@ public class GameBoard {
 			 output = new FileWriter(f);
 			 BufferedWriter writer = new BufferedWriter(output);
 			writer.write("" + highScore);
+			writer.newLine();
+			if(elapsedMS <= fastestMS && won){
+				writer.write("" + elapsedMS);
+			}
+			else{
+				writer.write("" + fastestMS);
+			}
 			 writer.close();
 		 } catch (Exception e) {
 			 e.printStackTrace();
@@ -259,6 +276,16 @@ public class GameBoard {
  		}
  	}
  	
+
+	 private String formatTime(long millis){
+		 String formattedTime;
+
+		 String hourFormat = "";
+		 int hours = (int)(millis/3600000);
+		 if(hours>=1){
+			 millis -= hours*3600000;
+		 }
+	 }
 	 private void resetPosition(Tile current, int row, int col){
 		 if(current == null) return;
 
